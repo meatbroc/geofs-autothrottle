@@ -12,13 +12,13 @@
     'use strict';
     window.flight = window.flight || {};
     window.flight.autothrottle = {
-        on: true,
+        on: false,
         init: function () {
             flight.autothrottle.initStyles();
             flight.autothrottle.callbackID = geofs.api.addFrameCallback(flight.autothrottle.tickWrapper);
             const controlButton = document.createElement("div");
             controlButton.classList.add("ext-autopilot-bar");
-            controlButton.innerHTML = `<div class="ext-control-pad ext-autopilot-pad" id="atc-button" tabindex="0" onclick="flight.autothrottle.open()"><div class="control-pad-label transp-pad">AIRSPACE</div>`;
+            controlButton.innerHTML = `<div class="ext-control-pad ext-autopilot-pad" id="atc-button" tabindex="0" onclick="flight.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`;
             const container = document.getElementsByClassName("geofs-autopilot-bar");
             container[0].appendChild(controlButton);
             const controlElmnt = document.createElement("div");
@@ -38,6 +38,20 @@
             container2[0].appendChild(controlElmnt);
             container2[0].appendChild(radiusElmnt);
             container2[0].appendChild(airportElmnt);
+            $(document).on("autothrottleOn", function() {
+                clearTimeout(flight.autothrottle.panelTimeout);
+                $(".ext-autopilot-controls").show();
+                $(".ext-autopilot-pad").removeClass("red-pad").addClass("green-pad");
+                flight.autothrottle.on = !0;
+            });
+            $(document).on("autothrottleOff", function() {
+                $(".ext-autopilot-pad").removeClass("green-pad").addClass("red-pad");
+                $(".ext-autopilot-controls").hide();
+                flight.autothrottle.panelTimeout = setTimeout(function() {
+                    $(".ext-autopilot-pad").removeClass("red-pad").removeClass("green-pad");
+                }, 3E3)
+                flight.autothrottle.on = !1;
+            });
         },
         initStyles: function () {
             if ($('[class^="ext-autopilot"]').length > 0) return;
@@ -183,8 +197,8 @@
             `;
             document.head.appendChild(style);
         },
-        open: function () {
-            console.log('clicked');
+        toggle: function () {
+            flight.autothrottle.on ? $(document).trigger("autothrottleOff") : $(document).trigger("autothrottleOn");
         },
         tick: function (a, b) {
             try {
@@ -199,10 +213,11 @@
                 d.PIDs.throttle.set(e, 0, 1);
                 controls.throttle = d.PIDs.throttle.compute(f, B);
                 controls.throttle = clamp(controls.throttle, 0, 1);
-                window.myValues = [a, b, A, B, c, d, e, f];
+                geofs.debug.autothrottleValues = [a, b, A, B, c, d, e, f];
             } catch (err) {
                 console.error(err);
                 ui.notification.show('An error with autothrottle occured, autothrottle is now disabled. Check console for more details.');
+                geofs.debug.log("meatbroc autothrottle error");
                 geofs.api.removeFrameCallback(flight.autothrottle.callbackID);
             }
         },
