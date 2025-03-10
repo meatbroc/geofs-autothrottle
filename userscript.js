@@ -16,6 +16,28 @@
         init: function () {
             flight.autothrottle.initStyles();
             flight.autothrottle.callbackID = geofs.api.addFrameCallback(flight.autothrottle.tickWrapper);
+            const controlButton = document.createElement("div");
+            controlButton.classList.add("ext-autopilot-bar");
+            controlButton.innerHTML = `<div class="ext-control-pad ext-autopilot-pad" id="atc-button" tabindex="0" onclick="flight.autothrottle.open()"><div class="control-pad-label transp-pad">AIRSPACE</div>`;
+            const container = document.getElementsByClassName("geofs-autopilot-bar");
+            container[0].appendChild(controlButton);
+            const controlElmnt = document.createElement("div");
+            controlElmnt.classList.add("ext-autopilot-controls");
+            controlElmnt.style.display = "none";
+            controlElmnt.innerHTML = `<div class="ext-autopilot-control"><span class="ext-autopilot-switch ext-autopilot-mode"><a class="ext-switchLeft" data-method="setMode" value="HDG" id="radar-sel">RDR</a><a class="ext-switchRight" data-method="setMode" value="NAV" id="vis-sel">VIS</a></span></div>`;
+            const radiusElmnt = document.createElement("div");
+            radiusElmnt.classList.add("ext-autopilot-control");
+            radiusElmnt.style.display = "none";
+            radiusElmnt.innerHTML = `<a class="ext-numberDown" id="radius-selDown">-</a><input class="ext-numberValue ext-autopilot-course" min="0" max="359" data-loop="true" step="1" maxlength="3" value="1"><a class="ext-numberUp" id="radius-selUp">+</a><span>RDR RADIUS</span>`;
+            const airportElmnt = document.createElement("div");
+            airportElmnt.classList.add("ext-autopilot-control");
+            airportElmnt.style.display = "none";
+            airportElmnt.style.width = "64px";
+            airportElmnt.innerHTML = `<input class="ext-airportInput ext-numberValue ext-autopilot-airport geofs-stopKeyboardPropagation geofs-stopKeyupPropagation" id="airport-selInput" min="0" max="359" data-loop="true" step="1" maxlength="4" value=""><a class="ext-numberUp" id="airport-selSub">→</a><span class="ext-airport-label">AIRPORT</span>`;
+            const container2 = document.getElementsByClassName("ext-autopilot-bar");
+            container2[0].appendChild(controlElmnt);
+            container2[0].appendChild(radiusElmnt);
+            container2[0].appendChild(airportElmnt);
         },
         initStyles: function () {
             if ($('[class^="ext-autopilot"]').length > 0) return;
@@ -160,7 +182,10 @@
                }
             `;
             document.head.appendChild(style);
-        }
+        },
+        open: function () {
+            console.log('clicked');
+        },
         tick: function (a, b) {
             try {
                 var A = clamp(Math.floor(b / geofs.api.renderingSettings.physicsDeltaMs), 1, 10)
