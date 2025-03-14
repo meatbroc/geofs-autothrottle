@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Autothrottle
 // @namespace    https://github.com/meatbroc/geofs-autothrottle/
-// @version      v1.0
+// @version      v1.5
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
 // @match        https://*.geo-fs.com/geofs.php*
@@ -29,7 +29,7 @@
                     $(".ext-autopilot-controls").show();
                     $(".ext-autopilot-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
-                    var a = geofs.animation.values.kias;
+                    var a = Math.round(geofs.animation.values.kias);
                     geofs.autopilot.setSpeed(a);
                     $(".ext-numberValue").val(a);
                 });
@@ -100,12 +100,12 @@
                        position: relative;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchRight {
-                       top: -15px !important;
+                       top: -25px !important;
                        border-radius: 0px 15px 15px 0px;
                        left: 0px;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchLeft {
-                       top: -15px !important;
+                       top: -25px !important;
                        border-radius: 15px 0px 0px 15px;
                        border-right: 5px;
                        right: -3px;
@@ -210,19 +210,27 @@
             },
             tickWrapper: function (a) {
                 if (geofs.autothrottle.on) {
+                    if (geofs.aircraft.instance.groundContact && geofs.autothrottle.armed) {
+                        controls.throttle = 0;
+                        $(document).trigger("autothrottleOff");
+                        return;
+                    }
                     var b = a - geofs.utils.now();
                     var c = b / 1E3;
                     try {
                         geofs.autothrottle.tick(c, b);
                     } catch (err) {
-                        console.error(err);
-                        ui.notification.show('An error with autothrottle occured, autothrottle is now disabled. Check console for more details.');
-                        geofs.debug.log("meatbroc autothrottle error");
-                        geofs.api.removeFrameCallback(geofs.autothrottle.callbackID);
-                        $(document).trigger("autothrottleOff");
-                        geofs.autothrottle.error = !0;
+                        geofs.autothrottle.handleError(err);
                     }
                 }
+            },
+            handleError: function (a) {
+                console.error(a);
+                ui.notification.show('An error with autothrottle occured, autothrottle is now disabled. Check console for more details.');
+                geofs.debug.log("meatbroc autothrottle error");
+                geofs.api.removeFrameCallback(geofs.autothrottle.callbackID);
+                $(document).trigger("autothrottleOff");
+                geofs.autothrottle.error = !0;
             },
         };
         geofs.autothrottle.init();
