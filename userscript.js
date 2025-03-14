@@ -5,7 +5,9 @@
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
 // @match        https://*.geo-fs.com/geofs.php*
+// @match        https://www.geo-fs.com/geofs.php*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=geo-fs.com
+// @grant        none
 // ==/UserScript==
 
 (function() {
