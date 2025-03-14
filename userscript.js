@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         GeoFS Autothrottle
 // @namespace    https://github.com/meatbroc/geofs-autothrottle/
-// @version      v1.0
+// @version      v1.5
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
+// @match        https://*.geo-fs.com/geofs.php*
 // @match        https://www.geo-fs.com/geofs.php*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=geo-fs.com
 // @grant        none
@@ -16,17 +17,23 @@
             init: function () {
                 geofs.autothrottle.initStyles();
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
-                const controlButton = $("<div/>").addClass("ext-autopilot-bar").html(`<div class="ext-control-pad ext-autopilot-pad" id="atc-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
+                const controlButton = $("<div/>").addClass("ext-autopilot-bar").html(`<div class="ext-control-pad ext-autopilot-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
-                const radiusElmnt = $("<div/>").html(`<a class="ext-numberDown numberDown ext-autopilot-control" id="radius-selDown">-</a><input class="ext-numberValue numberValue ext-autopilot-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-numberUp numberUp" id="radius-selUp">+</a><span>KTS</span>`).addClass("ext-autopilot-control");
-                const controlElmnt = $("<div/>").addClass("ext-autopilot-controls").hide().append(radiusElmnt);
-                $(".ext-autopilot-bar").append(controlElmnt);
+                const speedElmnt = $("<div/>").html(`<a class="ext-numberDown numberDown ext-autopilot-control">-</a><input class="ext-numberValue numberValue ext-autopilot-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autopilot-control");
+                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autopilot-switch ext-autopilot-mode"><a class="ext-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">MNL</a><a class="ext-switchRight switchRight" data-method="setArm" value="true" id="armOn">LND</a></span>`);
+                const controlElmnt = $("<div/>").addClass("ext-autopilot-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autopilot-bar"));
+                const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
+                controlButton.append($tooltip);
+                componentHandler.upgradeElement($tooltip[0]);
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
                     $(".ext-autopilot-controls").show();
                     $(".ext-autopilot-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
+                    var a = Math.round(geofs.animation.values.kias);
+                    geofs.autopilot.setSpeed(a);
+                    $(".ext-numberValue").val(a);
                 });
                 $(document).on("autothrottleOff", function() {
                     $(".ext-autopilot-pad").removeClass("green-pad").addClass("red-pad");
@@ -95,10 +102,12 @@
                        position: relative;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchRight {
+                       top: -25px !important;
                        border-radius: 0px 15px 15px 0px;
                        left: 0px;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchLeft {
+                       top: -25px !important;
                        border-radius: 15px 0px 0px 15px;
                        border-right: 5px;
                        right: -3px;
@@ -185,41 +194,54 @@
                 document.head.appendChild(style);
             },
             toggle: function () {
-                geofs.autothrottle.on ? $(document).trigger("autothrottleOff") : $(document).trigger("autothrottleOn");
-            },
-            speedUp: function (a) {
-                console.log(a);
+                !geofs.autothrottle.error && (geofs.autothrottle.on ? $(document).trigger("autothrottleOff") : $(document).trigger("autothrottleOn"));
             },
             tick: function (a, b) {
-                try {
-                    var A = clamp(Math.floor(b / geofs.api.renderingSettings.physicsDeltaMs), 1, 10)
-                      , B = a / A;
-                    var c = geofs.animation.values
-                    , d = geofs.autopilot
-                    , e = d.values.speed
-                    , f = c.kias;
-                    geofs.autopilot.speedMode == "mach" && (e = geofs.utils.machToKnots(d.values.speed),
-                    f = geofs.utils.machToKnots(c.mach));
-                    d.PIDs.throttle.set(e, 0, 1);
-                    controls.throttle = d.PIDs.throttle.compute(f, B);
-                    controls.throttle = clamp(controls.throttle, 0, 1);
-                    geofs.debug.autothrottleValues = [a, b, A, B, c, d, e, f];
-                } catch (err) {
-                    console.error(err);
-                    ui.notification.show('An error with autothrottle occured, autothrottle is now disabled. Check console for more details.');
-                    geofs.debug.log("meatbroc autothrottle error");
-                    geofs.api.removeFrameCallback(geofs.autothrottle.callbackID);
-                }
+                var A = clamp(Math.floor(b / geofs.api.renderingSettings.physicsDeltaMs), 1, 10)
+                  , B = a / A;
+                var c = geofs.animation.values
+                , d = geofs.autopilot
+                , e = d.values.speed
+                , f = c.kias;
+                geofs.autopilot.speedMode == "mach" && (e = geofs.utils.machToKnots(d.values.speed),
+                f = geofs.utils.machToKnots(c.mach));
+                d.PIDs.throttle.set(e, 0, 1);
+                controls.throttle = d.PIDs.throttle.compute(f, B);
+                controls.throttle = clamp(controls.throttle, 0, 1);
+                geofs.debug.autothrottleValues = [a, b, A, B, c, d, e, f];
             },
             tickWrapper: function (a) {
                 if (geofs.autothrottle.on) {
+                    if (geofs.aircraft.instance.groundContact && geofs.autothrottle.armed) {
+                        controls.throttle = 0;
+                        $(document).trigger("autothrottleOff");
+                        return;
+                    }
                     var b = a - geofs.utils.now();
                     var c = b / 1E3;
-                    geofs.autothrottle.tick(c, b);
+                    try {
+                        geofs.autothrottle.tick(c, b);
+                    } catch (err) {
+                        geofs.autothrottle.handleError(err);
+                    }
                 }
+            },
+            handleError: function (a) {
+                console.error(a);
+                ui.notification.show('An error with autothrottle occured, autothrottle is now disabled. Check console for more details.');
+                geofs.debug.log("meatbroc autothrottle error");
+                geofs.api.removeFrameCallback(geofs.autothrottle.callbackID);
+                $(document).trigger("autothrottleOff");
+                geofs.autothrottle.error = !0;
             },
         };
         geofs.autothrottle.init();
+        geofs.autopilot.setArm = function (a) {
+            const b = JSON.parse(a);
+            geofs.autothrottle.armed = b;
+            b ? ($("#armOn").addClass("green-pad"), $("#armOff").removeClass("green-pad")) : ($("#armOff").addClass("green-pad"), $("#armOn").removeClass("green-pad"));
+        }
+        ;
     }
     window.executeOnEventDone("geofsInitialized", main);
 })();
