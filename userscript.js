@@ -18,9 +18,10 @@
                 const controlButton = $("<div/>").addClass("ext-autopilot-bar").html(`<div class="ext-control-pad ext-autopilot-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
                 const speedElmnt = $("<div/>").html(`<a class="ext-numberDown numberDown ext-autopilot-control">-</a><input class="ext-numberValue numberValue ext-autopilot-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autopilot-control");
-                const controlElmnt = $("<div/>").addClass("ext-autopilot-controls").hide().append(speedElmnt).appendTo($(".ext-autopilot-bar"));
-                const $tooltip = $("<div/>").addClass("mdl-tooltip", "undefined").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
-                $(".ext-autopilot-bar").append($tooltip);
+                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autopilot-switch ext-autopilot-mode"><a class="ext-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">MNL</a><a class="ext-switchRight switchRight" data-method="setArm" value="true" id="armOn">LND</a></span>`);
+                const controlElmnt = $("<div/>").addClass("ext-autopilot-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autopilot-bar"));
+                const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
+                controlButton.append($tooltip);
                 componentHandler.upgradeElement($tooltip[0]);
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
@@ -99,10 +100,12 @@
                        position: relative;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchRight {
+                       top: -15px !important;
                        border-radius: 0px 15px 15px 0px;
                        left: 0px;
                    }
                    .ext-autopilot-bar .ext-autopilot-switch .ext-switchLeft {
+                       top: -15px !important;
                        border-radius: 15px 0px 0px 15px;
                        border-right: 5px;
                        right: -3px;
@@ -223,6 +226,12 @@
             },
         };
         geofs.autothrottle.init();
+        geofs.autopilot.setArm = function (a) {
+            const b = JSON.parse(a);
+            geofs.autothrottle.armed = b;
+            b ? ($("#armOn").addClass("green-pad"), $("#armOff").removeClass("green-pad")) : ($("#armOff").addClass("green-pad"), $("#armOn").removeClass("green-pad"));
+        }
+        ;
     }
     window.executeOnEventDone("geofsInitialized", main);
 })();
