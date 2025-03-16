@@ -17,29 +17,29 @@
             init: function () {
                 geofs.autothrottle.initStyles();
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
-                const controlButton = $("<div/>").addClass("ext-autopilot-bar").html(`<div class="ext-control-pad ext-autopilot-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
+                const controlButton = $("<div/>").addClass("ext-autothrottle-bar").html(`<div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
-                const speedElmnt = $("<div/>").html(`<a class="ext-numberDown numberDown ext-autopilot-control">-</a><input class="ext-numberValue numberValue ext-autopilot-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autopilot-control");
-                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autopilot-switch ext-autopilot-mode"><a class="ext-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">MNL</a><a class="ext-switchRight switchRight" data-method="setArm" value="true" id="armOn">LND</a></span>`);
-                const controlElmnt = $("<div/>").addClass("ext-autopilot-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autopilot-bar"));
+                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autothrottle-control");
+                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">MNL</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">LND</a></span>`);
+                const controlElmnt = $("<div/>").addClass("ext-autothrottle-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autothrottle-bar"));
                 const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
                 controlButton.append($tooltip);
                 componentHandler.upgradeElement($tooltip[0]);
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
-                    $(".ext-autopilot-controls").show();
-                    $(".ext-autopilot-pad").removeClass("red-pad").addClass("green-pad");
+                    $(".ext-autothrottle-controls").show();
+                    $(".ext-autothrottle-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
                     var a = Math.round(geofs.animation.values.kias);
                     geofs.autopilot.setSpeed(a);
-                    $(".ext-numberValue").val(a);
+                    $(".ext-autothrottle-numberValue").val(a);
                 });
                 $(document).on("autothrottleOff", function() {
-                    $(".ext-autopilot-pad").removeClass("green-pad").addClass("red-pad");
-                    $(".ext-autopilot-controls").hide();
+                    $(".ext-autothrottle-pad").removeClass("green-pad").addClass("red-pad");
+                    $(".ext-autothrottle-controls").hide();
                     geofs.autothrottle.panelTimeout = setTimeout(function() {
-                        $(".ext-autopilot-pad").removeClass("red-pad").removeClass("green-pad");
+                        $(".ext-autothrottle-pad").removeClass("red-pad").removeClass("green-pad");
                     }, 3E3)
                     geofs.autothrottle.on = !1;
                 });
@@ -48,32 +48,31 @@
                 });
             },
             initStyles: function () {
-                if ($('[class^="ext-autopilot"]').length > 0) return;
                 const style = document.createElement("style");
                 style.innerHTML = `
-                   .ext-autopilot-pad {
+                   .ext-autothrottle-pad {
                        width: 60px;
                        margin: 0px 10px;
                    }
-                   .ext-autopilot-bar {
+                   .ext-autothrottle-bar {
                        white-space: nowrap;
                        display: flex;
                        align-items: flex-start;
                        pointer-events: all;
                    }
-                   .ext-control-pad {
+                   .ext-autothrottle-control-pad {
                        border: 1px solid #888;
                        background-color: #000;
                        box-shadow: 0px 0px 5px #000;
                        border-radius: 15px;
                        cursor: pointer !important;
                    }
-                   .ext-autopilot-controls {
+                   .ext-autothrottle-controls {
                        vertical-align: bottom;
                        display: none;
                        margin-right: 10px;
                    }
-                   .ext-autopilot-control {
+                   .ext-autothrottle-control {
                        position: relative;
                        text-align: center;
                        margin: 0px 5px;
@@ -81,19 +80,19 @@
                        line-height: 25px;
                        display: inline-block;
                    }
-                   .ext-airport-label {
+                   .ext-autothrottle-airport-label {
                        position: relative !important;
                        left: 17.5px;
                    }
-                   .ext-highlighted {
+                   .ext-autothrottle-highlighted {
                        color: #66ff00 !important;
                        border-color: white !important;
                    }
-                   .ext-highlighted2 {
+                   .ext-autothrottle-highlighted2 {
                        color: #FF0000 !important;
                        border-color: white !important;
                    }
-                   .ext-autopilot-control span {
+                   .ext-autothrottle-control span {
                        display: block;
                        text-align: center;
                        text-shadow: #000 1px 1px 3px;
@@ -101,18 +100,18 @@
                        top: 2px;
                        position: relative;
                    }
-                   .ext-autopilot-bar .ext-autopilot-switch .ext-switchRight {
+                   .ext-autothrottle-bar .ext-autothrottle-switch .ext-autothrottle-switchRight {
                        top: -25px !important;
                        border-radius: 0px 15px 15px 0px;
                        left: 0px;
                    }
-                   .ext-autopilot-bar .ext-autopilot-switch .ext-switchLeft {
+                   .ext-autothrottle-bar .ext-autothrottle-switch .ext-autothrottle-switchLeft {
                        top: -25px !important;
                        border-radius: 15px 0px 0px 15px;
                        border-right: 5px;
                        right: -3px;
                    }
-                   .ext-autopilot-bar .ext-autopilot-switch a {
+                   .ext-autothrottle-bar .ext-autothrottle-switch a {
                        user-select: none;
                        -webkit-user-select: none;
                        position: relative;
@@ -128,7 +127,7 @@
                        border: 1px solid white;
                        box-shadow: 0px 0px 5px #000;
                    }
-                   .ext-autopilot-bar .ext-autopilot-control {
+                   .ext-autothrottle-bar .ext-autothrottle-control {
                        position: relative;
                        text-align: center;
                        margin: 0px 5px;
@@ -136,28 +135,28 @@
                        line-height: 25px;
                        display: inline-block;
                    }
-                   .ext-autopilot-bar .ext-autopilot-course {
+                   .ext-autothrottle-bar .ext-autothrottle-course {
                        width: 35px !important;
                    }
-                   .ext-autopilot-bar .ext-autopilot-airport {
+                   .ext-autothrottle-bar .ext-autothrottle-airport {
                        width: 70px !important;
                    }
-                   .ext-numberDown {
+                   .ext-autothrottle-numberDown {
                        border-radius: 15px 0px 0px 15px;
                        line-height: 23px;
                        right: -5px;
                        position: relative !important;
                    }
-                   .ext-numberUp {
+                   .ext-autothrottle-numberUp {
                        border-radius: 0px 15px 15px 0px;
                        line-height: 26px;
                        left: -5px;
                        position: relative !important;
                    }
-                   .ext-airportInput {
+                   .ext-autothrottle-airportInput {
                        border-radius: 15px 0px 0px 15px !important;
                    }
-                   .ext-autopilot-control .ext-numberDown,.ext-autopilot-control .ext-numberUp {
+                   .ext-autothrottle-control .ext-autothrottle-numberDown,.ext-autothrottle-control .ext-autothrottle-numberUp {
                        user-select: none;
                        -webkit-user-select: none;
                        vertical-align: top;
@@ -172,7 +171,7 @@
                        height: 25px;
                        box-shadow: 0px 0px 5px #000;
                    }
-                   .ext-autopilot-control .ext-numberValue {
+                   .ext-autothrottle-control .ext-autothrottle-numberValue {
                        font-family: 'LCD-Bold', monospace;
                        font-size: 20px !important;
                        letter-spacing: 1px;
