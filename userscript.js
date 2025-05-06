@@ -19,8 +19,9 @@
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
                 const controlButton = $("<div/>").addClass("ext-autothrottle-bar").html(`<div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
-                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autothrottle-control");
-                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">MNL</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">LND</a></span>`);
+                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autothrottle-control");
+                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a></span>`);
+                modeElmnt.append($("<span/>").text("LND MODE"));
                 const controlElmnt = $("<div/>").addClass("ext-autothrottle-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autothrottle-bar"));
                 const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
                 controlButton.append($tooltip);
@@ -28,6 +29,7 @@
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
+                    geofs.autopilot.setArm(false); // defaults to landing mode off
                     $(".ext-autothrottle-controls").show();
                     $(".ext-autothrottle-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
@@ -97,16 +99,16 @@
                        text-align: center;
                        text-shadow: #000 1px 1px 3px;
                        font-size: 12px;
-                       top: 2px;
+                       top: 0px;
                        position: relative;
                    }
                    .ext-autothrottle-bar .ext-autothrottle-switch .ext-autothrottle-switchRight {
-                       top: -25px !important;
+                       top: 0px !important;
                        border-radius: 0px 15px 15px 0px;
                        left: 0px;
                    }
                    .ext-autothrottle-bar .ext-autothrottle-switch .ext-autothrottle-switchLeft {
-                       top: -25px !important;
+                       top: 0px !important;
                        border-radius: 15px 0px 0px 15px;
                        border-right: 5px;
                        right: -3px;
@@ -136,7 +138,7 @@
                        display: inline-block;
                    }
                    .ext-autothrottle-bar .ext-autothrottle-course {
-                       width: 35px !important;
+                       width: 50px !important;
                    }
                    .ext-autothrottle-bar .ext-autothrottle-airport {
                        width: 70px !important;
@@ -186,7 +188,7 @@
                        line-height: 26px;
                        box-shadow: 0px 0px 5px #000;
                        color: white;
-                       width: 80px;
+                       width: 120px; /* overriden in ext-autothrottle-course */
                        text-align: right;
                    }
                 `;
@@ -207,7 +209,6 @@
                 d.PIDs.throttle.set(e, 0, 1);
                 controls.throttle = d.PIDs.throttle.compute(f, B);
                 controls.throttle = clamp(controls.throttle, 0, 1);
-                geofs.debug.autothrottleValues = [a, b, A, B, c, d, e, f];
             },
             tickWrapper: function (a) {
                 if (geofs.autothrottle.on) {
