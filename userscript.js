@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Autothrottle
 // @namespace    https://github.com/meatbroc/geofs-autothrottle/
-// @version      v1.5
+// @version      v1.6
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
 // @match        https://*.geo-fs.com/geofs.php*
@@ -13,7 +13,7 @@
 (function() {
     function main () {
         geofs.autothrottle = {
-            on: false,
+            on: !1,
             init: function () {
                 geofs.autothrottle.initStyles();
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
@@ -29,7 +29,7 @@
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
-                    geofs.autopilot.setArm(false); // defaults to landing mode off
+                    geofs.autopilot.setArm(!1); // defaults to landing mode off
                     $(".ext-autothrottle-controls").show();
                     $(".ext-autothrottle-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
@@ -48,6 +48,12 @@
                 $(document).on("autopilotOn", function () {
                     geofs.autothrottle.on && $(document).trigger("autothrottleOff");
                 });
+                // joystick support
+                const o = controls.axisSetters.throttle.process;
+                controls.axisSetters.throttle.process = function (e) {
+                    if (geofs.autothrottle.on) return;
+                    o(e);
+                };
             },
             initStyles: function () {
                 const style = document.createElement("style");
@@ -239,7 +245,8 @@
         geofs.autopilot.setArm = function (a) {
             const b = JSON.parse(a);
             geofs.autothrottle.armed = b;
-            b ? ($("#armOn").addClass("green-pad"), $("#armOff").removeClass("green-pad")) : ($("#armOff").addClass("green-pad"), $("#armOn").removeClass("green-pad"));
+            $("#armOn").toggleClass("green-pad", b);
+            $("#armOff").toggleClass("green-pad", !b);
         }
         ;
     }
