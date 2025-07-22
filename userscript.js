@@ -50,9 +50,9 @@
                 });
                 // joystick support
                 const o = controls.axisSetters.throttle.process;
-                controls.axisSetters.throttle.process = function (e) {
+                controls.axisSetters.throttle.process = function (e, t) {
                     if (geofs.autothrottle.on) return;
-                    o(e);
+                    o(e, t);
                 };
             },
             initStyles: function () {
