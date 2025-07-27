@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Autothrottle
 // @namespace    https://github.com/meatbroc/geofs-autothrottle/
-// @version      v1.6
+// @version      v1.7
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
 // @match        https://*.geo-fs.com/geofs.php*
@@ -48,6 +48,11 @@
                 $(document).on("autopilotOn", function () {
                     geofs.autothrottle.on && $(document).trigger("autothrottleOff");
                 });
+                const O = flight.recorder.clearPath;
+                flight.recorder.clearPath = () => {
+                    O();
+                    flight.recorder.mapPath = [];
+                }
                 // joystick support
                 const o = controls.axisSetters.throttle.process;
                 controls.axisSetters.throttle.process = function (e, t) {
