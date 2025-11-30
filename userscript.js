@@ -19,7 +19,11 @@
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
                 const controlButton = $("<div/>").addClass("ext-autothrottle-bar").html(`<div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
-                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-course" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a><span>KTS</span>`).addClass("ext-autothrottle-control");
+                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
+                <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
+                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
+                            <a class="ext-autothrottle-switchRight switchRight" data-method="setAutothrottleSpeedMode" value="mach" id="machMode">M.</a>
+                        </span>`).addClass("ext-autothrottle-control");
                 const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a></span>`);
                 modeElmnt.append($("<span/>").text("LND MODE"));
                 const controlElmnt = $("<div/>").addClass("ext-autothrottle-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autothrottle-bar"));
@@ -88,18 +92,6 @@
                        line-height: 25px;
                        display: inline-block;
                    }
-                   .ext-autothrottle-airport-label {
-                       position: relative !important;
-                       left: 17.5px;
-                   }
-                   .ext-autothrottle-highlighted {
-                       color: #66ff00 !important;
-                       border-color: white !important;
-                   }
-                   .ext-autothrottle-highlighted2 {
-                       color: #FF0000 !important;
-                       border-color: white !important;
-                   }
                    .ext-autothrottle-control span {
                        display: block;
                        text-align: center;
@@ -143,11 +135,8 @@
                        line-height: 25px;
                        display: inline-block;
                    }
-                   .ext-autothrottle-bar .ext-autothrottle-course {
+                   .ext-autothrottle-bar .ext-autothrottle-speed {
                        width: 50px !important;
-                   }
-                   .ext-autothrottle-bar .ext-autothrottle-airport {
-                       width: 70px !important;
                    }
                    .ext-autothrottle-numberDown {
                        border-radius: 15px 0px 0px 15px;
@@ -160,9 +149,6 @@
                        line-height: 26px;
                        left: -5px;
                        position: relative !important;
-                   }
-                   .ext-autothrottle-airportInput {
-                       border-radius: 15px 0px 0px 15px !important;
                    }
                    .ext-autothrottle-control .ext-autothrottle-numberDown,.ext-autothrottle-control .ext-autothrottle-numberUp {
                        user-select: none;
@@ -194,7 +180,7 @@
                        line-height: 26px;
                        box-shadow: 0px 0px 5px #000;
                        color: white;
-                       width: 120px; /* overriden in ext-autothrottle-course */
+                       width: 120px; /* overriden in ext-autothrottle-speed */
                        text-align: right;
                    }
                 `;
@@ -249,6 +235,28 @@
             $("#armOff").toggleClass("green-pad", !b);
         }
         ;
+        geofs.autopilot.setAutothrottleSpeedMode = function (e) {
+            console.log(e);
+            console.log("e");
+            var t = "mach" == e;
+            $("#machMode").toggleClass("green-pad", t);
+            $("#knotsMode").toggleClass("green-pad", !t);
+            if (t) geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2))
+            else geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed));
+            $(".ext-autothrottle-speed").val(geofs.autopilot.values.speed);
+            geofs.autopilot.speedMode = e;
+            /*
+            e != geofs.autopilot.speedMode && ("mach" == e ? (geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2)),
+            $(".geofs-autopilot-mach").val(geofs.autopilot.values.speed),
+            $(".geofs-speed-mode .switchLeft").removeClass("green-pad"),
+            $(".geofs-speed-mode .switchRight").addClass("green-pad")) : (geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed)),
+            $(".geofs-autopilot-mach").removeClass("numberValue"),
+            $(".geofs-autopilot-knots").addClass("numberValue").val(geofs.autopilot.values.speed),
+            $(".geofs-speed-mode .switchLeft").addClass("green-pad"),
+            $(".geofs-speed-mode .switchRight").removeClass("green-pad")),
+            geofs.autopilot.speedMode = e)
+            */
+        }
     }
     window.executeOnEventDone("geofsInitialized", main);
 })();
