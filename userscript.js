@@ -17,8 +17,34 @@
             init: function () {
                 geofs.autothrottle.initStyles();
                 geofs.autothrottle.callbackID = geofs.api.addFrameCallback(geofs.autothrottle.tickWrapper);
+                
+                $(`<div class="ext-autothrottle-bar">
+                    <div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()">
+                        <div class="control-pad-label transp-pad">A/THR</div>
+                    </div>
+                    <div class="ext-autothrottle-control">
+                        <a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
+                        <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
+                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
+                            <a class="ext-autothrottle-switchRight switchRight" data-method="setAutothrottleSpeedMode" value="mach" id="machMode">M.</a>
+                        </span>
+                    </div>
+                    <div class="geofs-autopilot-control">
+                        <span class="ext-autothrottle-switch ext-autothrottle-mode">
+                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a>
+                            <a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a>
+                        </span>
+                    </div>
+                    <div class="mdl-tooltip" id="autothrottle-tooltip" for="autothrottle-button">Toggle autothrottle on/off</div>
+                </div>`).appendTo(".geofs-autopilot-bar");
+                componentHandler.upgradeElement(document.querySelector("#autothrottle-tooltip"));
+                
+                /*
                 const controlButton = $("<div/>").addClass("ext-autothrottle-bar").html(`<div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
                 $(".geofs-autopilot-bar").append(controlButton);
+                const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
+                controlButton.append($tooltip);
+                componentHandler.upgradeElement($tooltip[0]);
                 const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
                 <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
                             <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
@@ -27,9 +53,7 @@
                 const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a></span>`);
                 modeElmnt.append($("<span/>").text("LND MODE"));
                 const controlElmnt = $("<div/>").addClass("ext-autothrottle-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autothrottle-bar"));
-                const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
-                controlButton.append($tooltip);
-                componentHandler.upgradeElement($tooltip[0]);
+                */
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
