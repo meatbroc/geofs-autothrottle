@@ -22,38 +22,25 @@
                     <div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()">
                         <div class="control-pad-label transp-pad">A/THR</div>
                     </div>
-                    <div class="ext-autothrottle-control">
-                        <a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
-                        <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
-                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
-                            <a class="ext-autothrottle-switchRight switchRight" data-method="setAutothrottleSpeedMode" value="mach" id="machMode">M.</a>
-                        </span>
-                    </div>
-                    <div class="geofs-autopilot-control">
-                        <span class="ext-autothrottle-switch ext-autothrottle-mode">
-                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a>
-                            <a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a>
-                        </span>
+                    <div class="ext-autothrottle-controls">
+                        <div class="ext-autothrottle-control">
+                            <a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
+                            <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
+                                <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
+                                <a class="ext-autothrottle-switchRight switchRight" data-method="setAutothrottleSpeedMode" value="mach" id="machMode">M.</a>
+                            </span>
+                        </div>
+                        <div class="geofs-autopilot-control">
+                            <span class="ext-autothrottle-switch ext-autothrottle-mode">
+                                <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a>
+                                <a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a>
+                            </span>
+                        </div>
                     </div>
                     <div class="mdl-tooltip" id="autothrottle-tooltip" for="autothrottle-button">Toggle autothrottle on/off</div>
                 </div>`).appendTo(".geofs-autopilot-bar");
                 componentHandler.upgradeElement(document.querySelector("#autothrottle-tooltip"));
-                
-                /*
-                const controlButton = $("<div/>").addClass("ext-autothrottle-bar").html(`<div class="ext-autothrottle-control-pad ext-autothrottle-pad" id="autothrottle-button" tabindex="0" onclick="geofs.autothrottle.toggle()"><div class="control-pad-label transp-pad">A/THR</div>`);
-                $(".geofs-autopilot-bar").append(controlButton);
-                const $tooltip = $("<div/>").addClass("mdl-tooltip").attr("for", "autothrottle-button").text("Toggle autothrottle on/off");
-                controlButton.append($tooltip);
-                componentHandler.upgradeElement($tooltip[0]);
-                const speedElmnt = $("<div/>").html(`<a class="ext-autothrottle-numberDown numberDown ext-autothrottle-control">-</a><input class="ext-autothrottle-numberValue numberValue ext-autothrottle-speed" min="0" smallstep="5" stepthreshold="100" step="10" data-method="setSpeed" maxlength="4" max="9999" value="0"><a class="ext-autothrottle-numberUp numberUp">+</a>
-                <span class="ext-autothrottle-switch ext-autothrottle-speedMode">
-                            <a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setAutothrottleSpeedMode" value="knots" id="knotsMode">KTS</a>
-                            <a class="ext-autothrottle-switchRight switchRight" data-method="setAutothrottleSpeedMode" value="mach" id="machMode">M.</a>
-                        </span>`).addClass("ext-autothrottle-control");
-                const modeElmnt = $("<div/>").addClass("geofs-autopilot-control").html(`<span class="ext-autothrottle-switch ext-autothrottle-mode"><a class="ext-autothrottle-switchLeft switchLeft green-pad" data-method="setArm" value="false" id="armOff">OFF</a><a class="ext-autothrottle-switchRight switchRight" data-method="setArm" value="true" id="armOn">ON</a></span>`);
-                modeElmnt.append($("<span/>").text("LND MODE"));
-                const controlElmnt = $("<div/>").addClass("ext-autothrottle-controls").hide().append(speedElmnt, modeElmnt).appendTo($(".ext-autothrottle-bar"));
-                */
+
                 $(document).on("autothrottleOn", function() {
                     geofs.autopilot.on && geofs.autopilot.turnOff();
                     clearTimeout(geofs.autothrottle.panelTimeout);
@@ -250,6 +237,8 @@
                 $(document).trigger("autothrottleOff");
                 geofs.autothrottle.error = !0;
             },
+            _ktsSpeedAttributes: {smallstep: "5", stepthreshold: "100", step: "10", maxlength: "4", max: "9999"},
+            _machSpeedAttributes: {smallstep: "0.01", decimals: "2", max: "10"}
         };
         geofs.autothrottle.init();
         geofs.autopilot.setArm = function (a) {
@@ -260,26 +249,13 @@
         }
         ;
         geofs.autopilot.setAutothrottleSpeedMode = function (e) {
-            console.log(e);
-            console.log("e");
             var t = "mach" == e;
             $("#machMode").toggleClass("green-pad", t);
             $("#knotsMode").toggleClass("green-pad", !t);
             if (t) geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2))
             else geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed));
-            $(".ext-autothrottle-speed").val(geofs.autopilot.values.speed);
+            $(".ext-autothrottle-speed").val(geofs.autopilot.values.speed).attr(t ? geofs.autothrottle._machSpeedAttributes : geofs.autothrottle._ktsSpeedAttributes);
             geofs.autopilot.speedMode = e;
-            /*
-            e != geofs.autopilot.speedMode && ("mach" == e ? (geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2)),
-            $(".geofs-autopilot-mach").val(geofs.autopilot.values.speed),
-            $(".geofs-speed-mode .switchLeft").removeClass("green-pad"),
-            $(".geofs-speed-mode .switchRight").addClass("green-pad")) : (geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed)),
-            $(".geofs-autopilot-mach").removeClass("numberValue"),
-            $(".geofs-autopilot-knots").addClass("numberValue").val(geofs.autopilot.values.speed),
-            $(".geofs-speed-mode .switchLeft").addClass("green-pad"),
-            $(".geofs-speed-mode .switchRight").removeClass("green-pad")),
-            geofs.autopilot.speedMode = e)
-            */
         }
     }
     window.executeOnEventDone("geofsInitialized", main);
