@@ -49,19 +49,25 @@
                     $(".ext-autothrottle-pad").removeClass("red-pad").addClass("green-pad");
                     geofs.autothrottle.on = !0;
                     var a = Math.round(geofs.animation.values.kias);
+                    geofs.autopilot.setAutothrottleSpeedMode(geofs.autopilot.speedMode);
                     geofs.autopilot.setSpeed(a);
                     $(".ext-autothrottle-numberValue").val(a);
                 });
+
                 $(document).on("autothrottleOff", function() {
                     $(".ext-autothrottle-pad").removeClass("green-pad").addClass("red-pad");
                     $(".ext-autothrottle-controls").hide();
                     geofs.autothrottle.panelTimeout = setTimeout(function() {
                         $(".ext-autothrottle-pad").removeClass("red-pad").removeClass("green-pad");
                     }, 3E3)
+                    geofs.autopilot.setSpeedMode(geofs.autopilot.speedMode);
                     geofs.autothrottle.on = !1;
                 });
-                $(document).on("autopilotOn", function () {
-                    geofs.autothrottle.on && $(document).trigger("autothrottleOff");
+
+                $(document).on("autopilotOn", () => {
+                    geofs.autopilot.setSpeedMode("knots");
+                    geofs.autopilot.setSpeed(geofs.animation.values.kias);
+                    geofs.autothrottle.on && $(document).trigger("autothrottleOff")
                 });
                 // joystick support
                 const o = controls.axisSetters.throttle.process;
@@ -252,10 +258,12 @@
             var t = "mach" == e;
             $("#machMode").toggleClass("green-pad", t);
             $("#knotsMode").toggleClass("green-pad", !t);
-            if (t) geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2))
-            else geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed));
+            console.log(geofs.autopilot.values.speed)
+            console.log(geofs.utils.knotsToMach(geofs.autopilot.values.speed))
+            this.setSpeedMode(e);
+            // if (t) geofs.autopilot.values.speed = Number(geofs.utils.knotsToMach(geofs.autopilot.values.speed).toFixed(2))
+            // else geofs.autopilot.values.speed = parseInt(geofs.utils.machToKnots(geofs.autopilot.values.speed));
             $(".ext-autothrottle-speed").val(geofs.autopilot.values.speed).attr(t ? geofs.autothrottle._machSpeedAttributes : geofs.autothrottle._ktsSpeedAttributes);
-            geofs.autopilot.speedMode = e;
         }
     }
     window.executeOnEventDone("geofsInitialized", main);
