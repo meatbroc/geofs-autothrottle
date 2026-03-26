@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Autothrottle
 // @namespace    https://github.com/meatbroc/geofs-autothrottle/
-// @version      v2.0
+// @version      v2.0beta
 // @description  Autothrottle addon for GeoFS that allows you to control the plane while autopilot controls the throttle.
 // @author       meatbroc
 // @match        https://*.geo-fs.com/geofs.php*
